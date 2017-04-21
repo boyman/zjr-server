@@ -1,19 +1,19 @@
-# Wafer 服务端 Demo - Node.js
+# ZJR 服务端
 
-本项目是 [腾讯云微信小程序服务端 SDK - Node.js](https://github.com/tencentyun/wafer-node-server-sdk) 的使用示例。示例需要和 [微信小程序客户端示例](https://github.com/tencentyun/wafer-client-demo) 配合一起使用。
+本项目是基于[腾讯云微信小程序服务端 SDK - Node.js](https://github.com/tencentyun/wafer-node-server-sdk)和[Wafer 服务端 Demo - Node.js](https://github.com/tencentyun/wafer-node-server-demo)开发的服务端。
 
-## 运行示例
+## 运行
 
-按照[小程序创建资源配置指引](https://github.com/tencentyun/weapp-doc)进行操作，可以得到运行本示例所需的资源和服务，其中包括已部署好的示例代码及自动下发的 SDK 配置文件 `/etc/qcloud/sdk.config`。
+按照[微信小程序创建资源配置指引](https://github.com/tencentyun/weapp-doc)进行操作，可以得到运行本项目所需的资源和服务，其中包括已部署好的代码及自动下发的 SDK 配置文件 `/etc/qcloud/sdk.config`。
 
-- 示例代码部署目录：`/data/release/node-weapp-demo`
-- 运行示例的 Node 版本：`v4.6.0`
+- 项目代码部署目录：`/data/app/zjr-server`
+- Node 版本：`v4.6.0`
 - Node 进程管理工具：`pm2`
 
 ## 项目结构
 
 ```
-Demo
+zjr-server
 ├── README.md
 ├── app.js
 ├── business
@@ -44,24 +44,6 @@ Demo
 }
 ```
 
-`routes/` 目录包含了示例用到的4个路由，路由和处理文件映射关系如下：
-
-```
-// 首页指引
-/ => routes/welcome.js
-
-// 登录
-/login => routes/login.js
-
-// 获取微信用户信息
-/user => routes/user.js
-
-// 处理信道请求
-/tunnel => routes/tunnel.js
-```
-
-`business/chat-tunnel-handler.js` 是业务处理信道请求的示例代码。
-
 ## 更新 SDK 版本
 
-进入目录 `/data/release/node-weapp-demo`，然后先后执行命令 `npm update`、`pm2 restart process.json` 即可。
+进入目录 `/data/app/zjr-server`，然后先后执行命令 `npm update`、`pm2 restart process.json` 即可。
