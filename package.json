@@ -1,7 +1,7 @@
 {
-  "name": "wafer-node-server-demo",
-  "version": "1.0.0",
-  "description": "Wafer 服务端 Demo - Node.js",
+  "name": "zjr-server",
+  "version": "0.0.1",
+  "description": "ZJR Server Side",
   "main": "index.js",
   "scripts": {
     "start": "pm2 start process.json"
