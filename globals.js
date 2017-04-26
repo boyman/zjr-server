@@ -3,8 +3,6 @@ global.debug = (() => {
 
     return function () {
         log('========================================');
-        log(Date.now())
-        log('----------------------------------------');
         log.apply(null, Array.from(arguments).map(item => {
             return (typeof item === 'object'
                 ? JSON.stringify(item, null, 2)

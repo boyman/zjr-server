@@ -9,6 +9,33 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const config = require('./config');
 
+const mongoose = require('mongoose');
+const promise = require('bluebird');
+
+//plugin bluebird promise in mongoose
+mongoose.Promise = promise;
+
+//connect to mongo db
+const db = config.mongo.debug ? `${config.mongo.database}_test` : config.mongo.database;
+const mongoUri = `${config.mongo.host}/${db}:${config.mongo.port}`;
+mongoose.connect(mongoUri, {
+	server : {
+		socketOptions : {
+			keepAlive : 1
+		}
+	}
+});
+mongoose.connection.on('error', () => {
+	throw new Error(`unable to connect to database: ${mongoUri}`);
+});
+
+//print mongoose logs in dev env
+if (config.mongo.debug) {
+	mongoose.set('debug', (collectionName, method, query, doc) => {
+		debug(`${collectionName}.${method}`, util.inspect(query, false, 20), doc);
+	});
+}
+
 const app = express();
 
 app.set('query parser', 'simple');
