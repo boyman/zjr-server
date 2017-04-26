@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
 		.then(data => {
 			const event = new Event(req.query);
 			event.createdBy = data.userInfo.openid;
-			event.dateTime = new Date(event.dateTime);
+			event.dateTime = new Date(req.query.date+'T'+req.query.time);
 			event.save()
 				.then(savedEvent => res.json({
 					code : 0,
