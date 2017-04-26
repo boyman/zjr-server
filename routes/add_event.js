@@ -3,7 +3,7 @@
 const LoginService = require('qcloud-weapp-server-sdk').LoginService;
 const Event = require('../models/event.model');
 
-module.exports = (req, res) => {
+module.exports = (req, res, next) => {
 	const loginService = LoginService.create(req, res);
 
 	loginService.check()
