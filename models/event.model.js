@@ -1,3 +1,5 @@
+'use strict';
+
 const Promise = require('bluebird');
 const mongoose = require('mongoose');
 const httpStatus = require('http-status');
