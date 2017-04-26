@@ -11,6 +11,7 @@ const config = require('./config');
 
 const mongoose = require('mongoose');
 const promise = require('bluebird');
+const util = require('util');
 
 //plugin bluebird promise in mongoose
 mongoose.Promise = promise;

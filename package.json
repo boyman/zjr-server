@@ -14,6 +14,7 @@
     "express": "^4.14.0",
     "lodash": "^4.16.1",
     "morgan": "^1.7.0",
-    "qcloud-weapp-server-sdk": "latest"
+    "qcloud-weapp-server-sdk": "latest",
+    "util": "^0.10.3"
   }
 }

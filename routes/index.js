@@ -2,11 +2,13 @@
 
 const express = require('express');
 const router = express.Router();
+const event = require('./event.route');
 
 router.get('/', require('./welcome'));
 router.get('/login', require('./login'));
 router.get('/user', require('./user'));
 router.all('/tunnel', require('./tunnel'));
-router.get('/add_event', require('./add_event'));
+router.get('/add_event', event.add_event);
+router.get('/get_event', event.get_event);
 
 module.exports = router;
