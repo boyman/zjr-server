@@ -47,6 +47,7 @@ const EventSchema = new Schema({
 	pendingGuests : {
 		type : [ String ]
 	},
+        watchers : [ String ],
 	createdBy : {
 		type : String,
 		required : true

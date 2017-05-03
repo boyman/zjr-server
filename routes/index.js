@@ -11,5 +11,8 @@ router.all('/tunnel', require('./tunnel'));
 router.get('/add_event', event.add_event);
 router.get('/get_event', event.new_get_event);
 router.get('/get_my_host_events', event.get_my_host_events);
+router.get('/all_events', event.all_events);
+router.get('/participate', event.participate);
+router.get('/unparticipate', event.unparticipate);
 
 module.exports = router;
