@@ -2,6 +2,7 @@
 
 const LoginService = require('qcloud-weapp-server-sdk').LoginService;
 const Event = require('../models/event.model');
+const User = require('../models/user.model');
 
 const get_event = (req, res, next) => {
     const loginService = LoginService.create(req, res);
@@ -16,6 +17,27 @@ const get_event = (req, res, next) => {
                 .catch(e => next(e));
         });
 };
+
+const new_get_event = (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+                .then(data => {
+            Event.findById(req.query.id).exec()
+                .then(event => {
+                     User.findOne({openId : data.userInfo.openId})
+                         .exec()
+                         .then(_user => {
+                             if(_user != null) event.createdBy = _user.name;
+                             res.json({
+                    		code : 0,
+                    		message : 'ok',
+                    		event : event
+                	    })
+                         }).catch(e => next(e))
+        });})
+};
+
+
 
 const get_my_host_events = (req, res, next) => {
     const loginService = LoginService.create(req, res);
@@ -53,6 +75,7 @@ const add_event = (req, res, next) => {
 };
 
 module.exports = {
+    new_get_event : new_get_event,
     get_event : get_event,
     get_my_host_events : get_my_host_events,
     add_event : add_event
