@@ -8,10 +8,10 @@ module.exports = (req, res) => {
     loginService.check()
         .then(data => {
             res.json({
-                'code': 0,
-                'message': 'ok',
-                'data': {
-                    'userInfo': data.userInfo,
+                'code' : 0,
+                'message' : 'ok',
+                'data' : {
+                    'userInfo' : data.userInfo,
                 },
             });
         });

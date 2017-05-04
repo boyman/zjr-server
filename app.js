@@ -18,7 +18,7 @@ mongoose.Promise = promise;
 
 //connect to mongo db
 const db = config.mongo.debug ? `${config.mongo.database}_test` : config.mongo.database;
-const mongoUri = `${config.mongo.host}/${db}:${config.mongo.port}`;
+const mongoUri = `${config.mongo.host}:${config.mongo.port}/${db}`;
 mongoose.connect(mongoUri, {
 	server : {
 		socketOptions : {
