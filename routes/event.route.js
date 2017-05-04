@@ -52,7 +52,11 @@ router.get('/all', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check().then(
         data => {
-            Event.find().select('name dateTime').exec().then(
+            Event.find({
+                createdBy : {
+                    $ne : data.userInfo.openId
+                }
+            }).select('name dateTime').exec().then(
                 events => res.json({
                     code : 0,
                     message : 'ok',
@@ -78,6 +82,19 @@ router.get('/add', (req, res, next) => {
                     message : 'ok'
                 }))
                 .catch(e => next(e));
+        });
+})
+
+router.get('/guests', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.findById(req.query.id).select('guests pendingGuests').exec().then(
+                event => res.json({
+                    code : 0,
+                    message : 'ok',
+                    event : event
+                }))
         });
 })
 
@@ -108,20 +125,20 @@ router.get('/unparticipate', (req, res, next) => {
     loginService.check()
         .then(data => {
             Event.findById(req.query.id).exec().then(event => {
-                    if (event.guests.indexOf(data.userInfo.openId) < 0 
-                            && event.pendingGuests.indexOf(data.userInfo.openId) < 0) {
-                        res.json({
-                            code : 1,
-                            message : 'duplicated'
-                        });
-                    }
-                    event.pendingGuests.pull(data.userInfo.openId);
-                    event.guests.pull(data.userInfo.openId);
-                    event.save().then(savedEvent => res.json({
-                        code : 0,
-                        message : 'ok'
-                    })).catch(e => next(e));
+                if (event.guests.indexOf(data.userInfo.openId) < 0
+                    && event.pendingGuests.indexOf(data.userInfo.openId) < 0) {
+                    res.json({
+                        code : 1,
+                        message : 'duplicated'
+                    });
                 }
+                event.pendingGuests.pull(data.userInfo.openId);
+                event.guests.pull(data.userInfo.openId);
+                event.save().then(savedEvent => res.json({
+                    code : 0,
+                    message : 'ok'
+                })).catch(e => next(e));
+            }
             ).catch(e => next(e));
         });
 });
