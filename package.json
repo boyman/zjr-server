@@ -12,7 +12,9 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "http-status": "^1.0.1",
     "lodash": "^4.16.1",
+    "mongoose": "^4.9.7",
     "morgan": "^1.7.0",
     "qcloud-weapp-server-sdk": "latest",
     "util": "^0.10.3"
