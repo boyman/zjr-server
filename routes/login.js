@@ -12,7 +12,8 @@ module.exports = (req, res, next) => {
             if (user == null) {
                 const user = new User({
                     openId : result.userInfo.openId,
-                    name : result.userInfo.nickName
+                    name : result.userInfo.nickName,
+                    avatarUrl : result.userInfo.avatarUrl
                 });
                 user.save().then().catch(e => next(e))
             }

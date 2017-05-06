@@ -42,7 +42,13 @@ const EventSchema = new Schema({
         }
     },
     guests : {
-        type : [ String ]
+        type : [ {
+        	openId : {
+        		type : String,
+        		required : true
+        	},
+        	guests : [String]
+        } ]
     },
     pendingGuests : {
         type : [ String ]
@@ -58,6 +64,18 @@ const EventSchema = new Schema({
     }
 });
 
+EventSchema.methods.participated = function (openId) {
+	let i;
+	for(i = 0; i < this.guests.length; i++) {
+		if(this.guests[i].openId == openId) return i;
+	}
+	return -1;
+};
+
+EventSchema.methods.participatePending = function (openId) {
+	return this.pendingGuests.indexOf(openId);
+};
+
 EventSchema.statics.toResponseObject = (event, wxuser, _user) => {
     return {
         _id : event._id,
@@ -69,11 +87,11 @@ EventSchema.statics.toResponseObject = (event, wxuser, _user) => {
         address : event.address,
         numPendingGuests : event.pendingGuests.length,
         isMine : event.createdBy == wxuser.openId,
-        participated : (event.guests.indexOf(wxuser.openId) > -1),
-        pending : (event.pendingGuests.indexOf(wxuser.openId) > -1),
+        participated : (event.participated(wxuser.openId) > -1),
+        pending : (event.participatePending(wxuser.openId) > -1),
         watching : (event.watchers.indexOf(wxuser.openId) > -1),
         host : _user.name
     }
-}
+};
 
 module.exports = mongoose.model('Event', EventSchema);

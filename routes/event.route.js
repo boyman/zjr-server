@@ -79,68 +79,13 @@ router.get('/add', (req, res, next) => {
             event.save()
                 .then(savedEvent => res.json({
                     code : 0,
-                    message : 'ok'
+                    message : 'ok',
+                    savedEvent : { _id : savedEvent._id },
                 }))
                 .catch(e => next(e));
         });
 })
 
-router.get('/guests', (req, res, next) => {
-    const loginService = LoginService.create(req, res);
-    loginService.check()
-        .then(data => {
-            Event.findById(req.query.id).select('guests pendingGuests').exec().then(
-                event => res.json({
-                    code : 0,
-                    message : 'ok',
-                    event : event
-                }))
-        });
-})
-
-router.get('/participate', (req, res, next) => {
-    const loginService = LoginService.create(req, res);
-    loginService.check()
-        .then(data => {
-            Event.findById(req.query.id).exec().then(
-                event => {
-                    if (event.guests.indexOf(data.userInfo.openId) > -1 || event.pendingGuests.indexOf(data.userInfo.openId) > -1)
-                        res.json({
-                            code : 1,
-                            message : 'duplicated'
-                        });
-                    if (event.settings.needApprove) event.pendingGuests.push(data.userInfo.openId);
-                    else event.guests.push(data.userInfo.openId);
-                    event.save().then(savedEvent => res.json({
-                        code : 0,
-                        message : 'ok'
-                    })).catch(e => next(e));
-                }
-            ).catch(e => next(e));
-        });
-});
-
-router.get('/unparticipate', (req, res, next) => {
-    const loginService = LoginService.create(req, res);
-    loginService.check()
-        .then(data => {
-            Event.findById(req.query.id).exec().then(event => {
-                if (event.guests.indexOf(data.userInfo.openId) < 0
-                    && event.pendingGuests.indexOf(data.userInfo.openId) < 0) {
-                    res.json({
-                        code : 1,
-                        message : 'duplicated'
-                    });
-                }
-                event.pendingGuests.pull(data.userInfo.openId);
-                event.guests.pull(data.userInfo.openId);
-                event.save().then(savedEvent => res.json({
-                    code : 0,
-                    message : 'ok'
-                })).catch(e => next(e));
-            }
-            ).catch(e => next(e));
-        });
-});
+router.use('/guest', require('./event/guest.route'))
 
 module.exports = router;
