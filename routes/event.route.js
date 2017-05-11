@@ -6,43 +6,78 @@ const LoginService = require('qcloud-weapp-server-sdk').LoginService;
 const Event = require('../models/event.model');
 const User = require('../models/user.model');
 
-/**
- * Get detail of a single event
- * Path: /event/get?id=<event_id>
- */
+
 router.get('/get', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check()
         .then(data => {
-            Event.findById(req.query.id).exec()
-                .then(event => {
-                    User.findOne({
-                        openId : event.createdBy
-                    })
-                        .exec()
-                        .then(_user => {
-                            res.json({
-                                code : 0,
-                                message : 'ok',
-                                event : Event.toResponseObject(event, data.userInfo, _user)
-                            })
-                        }).catch(e => next(e))
-                });
+            Event.getDetail(req.query.id, data.userInfo.openId).then(event => {
+                res.json({
+                    code : 0,
+                    message : 'ok',
+                    event : event
+                })
+            });
         })
 });
 
-router.get('/my_hosting', (req, res, next) => {
+router.get('/watch', (req, res, next) => {
     const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.watch(req.query.id, data.userInfo.openId).then(event => {
+                res.json({
+                    code : 0,
+                    message : 'ok'
+                })
+            }).catch(e => next(e))
+        });
+});
+
+router.get('/unwatch', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.unwatch(req.query.id, data.userInfo.openId).then(event => {
+                res.json({
+                    code : 0,
+                    message : 'ok'
+                })
+            }).catch(e => next(e))
+        });
+});
+
+router.get('/for_me', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    var myEvents = {
+        hosting : [],
+        participating : [],
+        pending : [],
+        watching : [],
+    };
+    const columns = 'name dateTime';
     loginService.check().then(
         data => {
-            Event.find({
-                createdBy : data.userInfo.openId
-            }).select('name dateTime').exec().then(
-                events => res.json({
-                    code : 0,
-                    message : 'ok',
-                    events : events
-                })
+            Event.hosting(data.userInfo.openId).then(
+                events => {
+                    myEvents.hosting = events;
+                    Event.participating(data.userInfo.openId).then(
+                        events => {
+                            myEvents.participating = events;
+                            Event.pending(data.userInfo.openId).then(events => {
+                                myEvents.pending = events;
+                                Event.watching(data.userInfo.openId).then(events => {
+                                    myEvents.watching = events;
+                                    res.json({
+                                        code : 0,
+                                        message : 'ok',
+                                        events : myEvents
+                                    })
+                                })
+                            })
+                        }
+                    )
+                }
             ).catch(e => next(e));
         }
     );
@@ -80,7 +115,9 @@ router.get('/add', (req, res, next) => {
                 .then(savedEvent => res.json({
                     code : 0,
                     message : 'ok',
-                    savedEvent : { _id : savedEvent._id },
+                    savedEvent : {
+                        _id : savedEvent._id
+                    },
                 }))
                 .catch(e => next(e));
         });

@@ -10,15 +10,24 @@ router.get('/get', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check()
         .then(data => {
-            Event.findById(req.query.id).select('guests pendingGuests').exec().then(
-                event => res.json({
+            Event.getGuests(req.query.id).then(
+                guests => res.json({
                     code : 0,
                     message : 'ok',
-                    guests : {
-                    	guests: event.guests,
-                    	pendingGuests: (event.createdBy == data.userInfo.openId ? event.pendingGuests : [])
-                    }
-                }))
+                    guests : guests
+                })).catch(e => next(e));
+        });
+})
+
+router.get('/bring_guests', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.bringGuests(req.query.id, data.userInfo.openId, req.query.guests.split(",")).then(
+                guests => res.json({
+                    code : 0,
+                    message : 'ok'
+                })).catch(e => next(e));
         });
 })
 
@@ -28,14 +37,18 @@ router.get('/participate', (req, res, next) => {
         .then(data => {
             Event.findById(req.query.id).exec().then(
                 event => {
-                	let guestIdx = event.participated(data.userInfo.openId)
+                    let guestIdx = event.participated(data.userInfo.openId)
                     if (guestIdx > -1 || event.participatePending(data.userInfo.openId) > -1)
                         res.json({
                             code : 1,
                             message : 'duplicated'
                         });
                     if (event.settings.needApprove) event.pendingGuests.push(data.userInfo.openId);
-                    else event.guests.push({ openId : data.userInfo.openId, guests : [] });
+                    else event.guests.push({
+                            openId : data.userInfo.openId,
+                            guests : []
+                        });
+                    event.watchers.pull(data.userInfo.openId);
                     event.save().then(savedEvent => res.json({
                         code : 0,
                         message : 'ok'
@@ -50,16 +63,16 @@ router.get('/unparticipate', (req, res, next) => {
     loginService.check()
         .then(data => {
             Event.findById(req.query.id).exec().then(event => {
-            	let guestIdx = event.participated(data.userInfo.openId)
+                let guestIdx = event.participated(data.userInfo.openId)
                 if (guestIdx < 0 && event.participatePending(data.userInfo.openId) < 0) {
                     res.json({
                         code : 1,
                         message : 'duplicated'
                     });
                 }
-            	if(guestIdx >= 0) event.guests.splice(guestIdx, 1)
-            	else event.pendingGuests.pull(data.userInfo.openId);
-            	
+                if (guestIdx >= 0) event.guests.splice(guestIdx, 1)
+                else event.pendingGuests.pull(data.userInfo.openId);
+
                 event.save().then(savedEvent => res.json({
                     code : 0,
                     message : 'ok'

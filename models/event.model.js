@@ -43,11 +43,11 @@ const EventSchema = new Schema({
     },
     guests : {
         type : [ {
-        	openId : {
-        		type : String,
-        		required : true
-        	},
-        	guests : [String]
+            openId : {
+                type : String,
+                required : true
+            },
+            guests : [ String ]
         } ]
     },
     pendingGuests : {
@@ -64,33 +64,357 @@ const EventSchema = new Schema({
     }
 });
 
-EventSchema.methods.participated = function (openId) {
-	let i;
-	for(i = 0; i < this.guests.length; i++) {
-		if(this.guests[i].openId == openId) return i;
-	}
-	return -1;
+EventSchema.methods.participated = function(openId) {
+    let i;
+    for (i = 0; i < this.guests.length; i++) {
+        if (this.guests[i].openId == openId) return i;
+    }
+    return -1;
 };
 
-EventSchema.methods.participatePending = function (openId) {
-	return this.pendingGuests.indexOf(openId);
+EventSchema.methods.participatePending = function(openId) {
+    return this.pendingGuests.indexOf(openId);
 };
 
-EventSchema.statics.toResponseObject = (event, wxuser, _user) => {
-    return {
-        _id : event._id,
-        name : event.name,
-        createdBy : event.createdBy,
-        dateTime : event.dateTime,
-        description : event.description,
-        numGuests : event.guests.length,
-        address : event.address,
-        numPendingGuests : event.pendingGuests.length,
-        isMine : event.createdBy == wxuser.openId,
-        participated : (event.participated(wxuser.openId) > -1),
-        pending : (event.participatePending(wxuser.openId) > -1),
-        watching : (event.watchers.indexOf(wxuser.openId) > -1),
-        host : _user.name
+EventSchema.statics = {
+    hosting : function(openId) {
+        return this.aggregate([ {
+            $match : {
+                createdBy : openId
+            }
+        }, {
+            $project : {
+                name : 1,
+                dateTime : {
+                    $dateToString : {
+                        format : "%Y/%m/%d %H:%M",
+                        date : "$dateTime"
+                    }
+                }
+            }
+        }
+        ]).exec();
+    },
+    participating : function(openId) {
+        return this.aggregate([ {
+            $match : {
+                guests : {
+                    $elemMatch : {
+                        openId : openId
+                    }
+                }
+            }
+        }, {
+            $project : {
+                name : 1,
+                dateTime : {
+                    $dateToString : {
+                        format : "%Y/%m/%d %H:%M",
+                        date : "$dateTime"
+                    }
+                }
+            }
+        }
+        ]).exec();
+    },
+    pending : function(openId) {
+        return this.aggregate([ {
+            $match : {
+                pendingGuests : openId
+            }
+        }, {
+            $project : {
+                name : 1,
+                dateTime : {
+                    $dateToString : {
+                        format : "%Y/%m/%d %H:%M",
+                        date : "$dateTime"
+                    }
+                }
+            }
+        }
+        ]).exec();
+    },
+    watching : function(openId) {
+        return this.aggregate([ {
+            $match : {
+                watchers : openId
+            }
+        }, {
+            $project : {
+                name : 1,
+                dateTime : {
+                    $dateToString : {
+                        format : "%Y/%m/%d %H:%M",
+                        date : "$dateTime"
+                    }
+                }
+            }
+        }
+        ]).exec();
+    },
+    watch : function(id, openId) {
+        return this.update({
+            $and : [ {
+                "_id" : {
+                    $eq : id
+                }
+            }, {
+                pendingGuests : {
+                    $ne : openId
+                }
+            }, {
+                "guests.openId" : {
+                    $ne : openId
+                }
+            }, {
+                watchers : {
+                    $ne : openId
+                }
+            } ]
+        }, {
+            $push : {
+                watchers : openId
+            }
+        }).exec();
+    },
+    unwatch : function(id, openId) {
+        return this.update({
+            _id : id,
+            watchers : openId
+        }, {
+            $pull : {
+                watchers : openId
+            }
+        }).exec();
+    },
+    getGuests : function(id) {
+        return this.aggregate([ {
+            $match : {
+                _id : mongoose.Types.ObjectId(id)
+            },
+        }, {
+            $unwind : {
+                path : '$pendingGuests',
+                preserveNullAndEmptyArrays : true
+            }
+        }, {
+            $lookup : {
+                from : 'users',
+                localField : 'pendingGuests',
+                foreignField : 'openId',
+                as : 'pendingDoc'
+            }
+        }, {
+            $unwind : {
+                path : '$pendingDoc',
+                preserveNullAndEmptyArrays : true
+            }
+        }, {
+            $group : {
+                _id : null,
+                guests : {
+                    $first : '$guests'
+                },
+                pendingGuests : {
+                    $push : '$pendingDoc.name'
+                }
+            }
+        }, {
+            $unwind : {
+                path : '$guests',
+                preserveNullAndEmptyArrays : true
+            }
+        }, {
+            $lookup : {
+                from : 'users',
+                localField : 'guests.openId',
+                foreignField : 'openId',
+                as : 'guestDoc'
+            }
+        }, {
+            $unwind : {
+                path : '$guestDoc',
+                preserveNullAndEmptyArrays : true
+            }
+        }, {
+            $addFields : {
+                numGuests : {
+                    $add : [ {
+                        $cond : [ {
+                            $not : [ "$guests" ]
+                        }, 0, 1 ]
+                    }, {
+                        $size : {
+                            "$ifNull" : [ '$guests.guests', [] ]
+                        }
+                    } ]
+                }
+            }
+        }, {
+            $group : {
+                _id : null,
+                guests : {
+                    $push : {
+                        name : '$guestDoc.name',
+                        guests : '$guests.guests',
+                        image : '$guestDoc.avatarUrl'
+                    }
+                },
+                pendingGuests : {
+                    $first : '$pendingGuests'
+                },
+                totalGuests : {
+                    $sum : '$numGuests'
+                }
+            }
+        }
+        ]).exec();
+    },
+    getThumbnail : function(id) {
+        return this.aggregate([ {
+            $match : {
+                _id : mongoose.Types.ObjectId(id)
+            }
+        }, {
+            $project : {
+                name : 1,
+                description : 1,
+                address : 1,
+                dateTime : {
+                    $dateToString : {
+                        format : "%Y/%m/%d %H:%M",
+                        date : "$dateTime"
+                    }
+                }
+            }
+        }
+        ]).exec();
+    },
+    getDetail : function(id, openId) {
+        return this.aggregate([
+            {
+                $match : {
+                    _id : mongoose.Types.ObjectId(id)
+                }
+            }, {
+                $lookup : {
+                    from : 'users',
+                    localField : 'createdBy',
+                    foreignField : 'openId',
+                    as : 'hostDoc'
+                }
+            }, {
+                $unwind : '$hostDoc'
+            }, {
+                $unwind : {
+                    path : '$guests',
+                    preserveNullAndEmptyArrays : true
+                }
+            }, {
+                $addFields : {
+                    numGuests : {
+                        $add : [ {
+                            $cond : [ {
+                                $not : [ "$guests" ]
+                            }, 0, 1 ]
+                        }, {
+                            $size : {
+                                "$ifNull" : [ '$guests.guests', [] ]
+                            }
+                        } ]
+                    },
+                    participating : {
+                        $eq : [ '$guests.openId', openId ]
+                    },
+                    pending : {
+                        $in : [ openId, '$pendingGuests' ]
+                    },
+                    watching : {
+                        $in : [ openId, '$watchers' ]
+                    }
+                }
+            }, {
+                $group : {
+                    _id : '$_id',
+                    totalGuests : {
+                        $sum : '$numGuests'
+                    },
+                    participating : {
+                        $max : '$participating'
+                    },
+                    pending : {
+                        $max : '$pending'
+                    },
+                    watching : {
+                        $max : '$watching'
+                    },
+                    name : {
+                        $first : '$name'
+                    },
+                    description : {
+                        $first : '$description'
+                    },
+                    dateTime : {
+                        $first : {
+                            $dateToString : {
+                                format : "%Y/%m/%d %H:%M",
+                                date : '$dateTime'
+                            }
+                        }
+                    },
+                    /*createdBy : {
+                        $first : '$createdBy'
+                    },*/
+                    host : {
+                        $first : "$hostDoc.name"
+                    },
+                    address : {
+                        $first : '$address'
+                    },
+                    totalPending : {
+                        $first : {
+                            $size : {
+                                $ifNull : [
+                                    '$pendingGuests'
+                                    , [] ]
+                            }
+                        }
+                    },
+                    totalWatching : {
+                        $first : {
+                            $size : {
+                                $ifNull : [
+                                    '$watchers'
+                                    , [] ]
+                            }
+                        }
+                    },
+                    /*pendingGuests : {
+                        $first : '$pendingGuests'
+                    },*/
+                    isMine : {
+                        $first : {
+                            $eq : [
+                                '$createdBy'
+                                , openId ]
+                        }
+                    }
+                }
+            }
+        ]).exec();
+    },
+    bringGuests : function(id, openId, guests) {
+        return this.update({
+            _id : id,
+            guests:{
+                openId : openId
+            }
+        }, {
+            $set : {
+                "guests.$.guests" : guests
+            }
+        }).exec();
     }
 };
 
