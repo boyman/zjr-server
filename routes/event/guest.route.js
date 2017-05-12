@@ -19,11 +19,25 @@ router.get('/get', (req, res, next) => {
         });
 })
 
-router.get('/bring_guests', (req, res, next) => {
+router.get('/my', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check()
         .then(data => {
-            Event.bringGuests(req.query.id, data.userInfo.openId, req.query.guests.split(",")).then(
+            Event.getMyGuests(req.query.id, data.userInfo.openId).then(event => {
+                res.json({
+                    code : 0,
+                    message : 'ok',
+                    event : event
+                })
+            });
+        })
+});
+
+router.post('/bring', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.bringGuests(req.query.id, data.userInfo.openId, req.body.guests).then(
                 guests => res.json({
                     code : 0,
                     message : 'ok'

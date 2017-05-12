@@ -406,15 +406,32 @@ EventSchema.statics = {
     },
     bringGuests : function(id, openId, guests) {
         return this.update({
-            _id : id,
-            guests:{
-                openId : openId
-            }
+            "_id" : mongoose.Types.ObjectId(id),
+            "guests.openId" : openId
         }, {
             $set : {
                 "guests.$.guests" : guests
             }
         }).exec();
+    },
+    getMyGuests : function(id, openId) {
+        return this.aggregate([
+            {
+                $match : {
+                    _id : mongoose.Types.ObjectId(id)
+                }
+            }, {
+                $unwind : "$guests"
+            }, {
+                $match : {
+                    'guests.openId' : openId
+                }
+            }, {
+                $project : {
+                    guests : '$guests.guests'
+                }
+            }
+        ]).exec();
     }
 };
 
