@@ -102,15 +102,15 @@ router.get('/all', (req, res, next) => {
     );
 });
 
-// TODO: make this POST
-router.get('/add', (req, res, next) => {
+router.post('/add', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check()
         .then(data => {
-            const event = new Event(req.query);
+            const event = new Event(req.body);
             event.createdBy = data.userInfo.openId;
-            console.log(req.query.date + ' ' + req.query.time);
-            event.dateTime = new Date(req.query.date + ' ' + req.query.time);
+            event.settings = req.body;
+            event.dateTime = new Date(req.body.date + ' ' + req.body.time);
+            debug(event)
             event.save()
                 .then(savedEvent => res.json({
                     code : 0,
@@ -119,8 +119,8 @@ router.get('/add', (req, res, next) => {
                         _id : savedEvent._id
                     },
                 }))
-                .catch(e => next(e));
-        });
+        }).catch(e => next(e));
+    ;
 })
 
 router.use('/guest', require('./event/guest.route'))

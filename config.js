@@ -11,4 +11,5 @@ module.exports = {
 		database : 'zhaojiren',
 		port : 27017,
 	},
+	productMode : false,
 };

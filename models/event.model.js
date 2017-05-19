@@ -36,9 +36,9 @@ const EventSchema = new Schema({
             type : Boolean,
             default : true
         },
-        privateGuestList : {
-            type : Boolean,
-            default : true
+        guestsVisibility : {
+            type : Number,
+            default : 1 // visible by guests
         }
     },
     guests : {

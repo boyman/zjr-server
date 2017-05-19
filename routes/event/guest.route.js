@@ -51,25 +51,29 @@ router.get('/participate', (req, res, next) => {
         .then(data => {
             Event.findById(req.query.id).exec().then(
                 event => {
-                    let guestIdx = event.participated(data.userInfo.openId)
-                    if (guestIdx > -1 || event.participatePending(data.userInfo.openId) > -1)
+                    if (event.participated(data.userInfo.openId) > -1
+                        || event.participatePending(data.userInfo.openId) > -1) {
                         res.json({
                             code : 1,
                             message : 'duplicated'
                         });
-                    if (event.settings.needApprove) event.pendingGuests.push(data.userInfo.openId);
-                    else event.guests.push({
+                    }
+                    if (event.settings.needApprove) {
+                        event.pendingGuests.push(data.userInfo.openId);
+                    } else {
+                        event.guests.push({
                             openId : data.userInfo.openId,
                             guests : []
                         });
+                    }
                     event.watchers.pull(data.userInfo.openId);
                     event.save().then(savedEvent => res.json({
                         code : 0,
                         message : 'ok'
-                    })).catch(e => next(e));
+                    }))
                 }
-            ).catch(e => next(e));
-        });
+            )
+        }).catch(e => next(e));;
 });
 
 router.get('/unparticipate', (req, res, next) => {
