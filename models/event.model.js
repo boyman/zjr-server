@@ -85,12 +85,7 @@ EventSchema.statics = {
         }, {
             $project : {
                 name : 1,
-                dateTime : {
-                    $dateToString : {
-                        format : "%Y/%m/%d %H:%M",
-                        date : "$dateTime"
-                    }
-                }
+                dateTime : 1,
             }
         }
         ]).exec();
@@ -107,12 +102,7 @@ EventSchema.statics = {
         }, {
             $project : {
                 name : 1,
-                dateTime : {
-                    $dateToString : {
-                        format : "%Y/%m/%d %H:%M",
-                        date : "$dateTime"
-                    }
-                }
+                dateTime : 1,
             }
         }
         ]).exec();
@@ -125,12 +115,7 @@ EventSchema.statics = {
         }, {
             $project : {
                 name : 1,
-                dateTime : {
-                    $dateToString : {
-                        format : "%Y/%m/%d %H:%M",
-                        date : "$dateTime"
-                    }
-                }
+                dateTime : 1,
             }
         }
         ]).exec();
@@ -143,12 +128,7 @@ EventSchema.statics = {
         }, {
             $project : {
                 name : 1,
-                dateTime : {
-                    $dateToString : {
-                        format : "%Y/%m/%d %H:%M",
-                        date : "$dateTime"
-                    }
-                }
+                dateTime : 1,
             }
         }
         ]).exec();
@@ -281,12 +261,7 @@ EventSchema.statics = {
                 name : 1,
                 description : 1,
                 address : 1,
-                dateTime : {
-                    $dateToString : {
-                        format : "%Y/%m/%d %H:%M",
-                        date : "$dateTime"
-                    }
-                },
+                dateTime : 1,
                 settings : 1,
             }
         }
@@ -357,12 +332,7 @@ EventSchema.statics = {
                         $first : '$description'
                     },
                     dateTime : {
-                        $first : {
-                            $dateToString : {
-                                format : "%Y/%m/%d %H:%M",
-                                date : '$dateTime'
-                            }
-                        }
+                        $first : '$dateTime'
                     },
                     /*createdBy : {
                         $first : '$createdBy'
