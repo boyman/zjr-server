@@ -21,6 +21,16 @@ router.get('/get', (req, res, next) => {
         })
 });
 
+router.get('/thumbnail', (req, res, next) => {
+    Event.getThumbnail(req.query.id).then(event => {
+        res.json({
+            code : 0,
+            message : 'ok',
+            event : event
+        })
+    }).catch(e => next(e));
+});
+
 router.get('/watch', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check()
@@ -83,6 +93,7 @@ router.get('/for_me', (req, res, next) => {
     );
 });
 
+// TODO: remove this
 router.get('/all', (req, res, next) => {
     const loginService = LoginService.create(req, res);
     loginService.check().then(
@@ -119,6 +130,41 @@ router.post('/add', (req, res, next) => {
                         _id : savedEvent._id
                     },
                 }))
+        }).catch(e => next(e));
+    ;
+})
+
+router.post('/edit', (req, res, next) => {
+    const loginService = LoginService.create(req, res);
+    loginService.check()
+        .then(data => {
+            Event.findById(req.body.id).exec().then(event => {
+                if(event == null) {
+                    res.json({
+                        code : 1,
+                        message : 'invalid id',                        
+                    })
+                }
+                if(event.createdBy != data.userInfo.openId) {
+                    res.json({
+                        code : 1,
+                        message : 'unauthorized',
+                    })
+                }
+                event.description = req.body.description;
+                event.dateTime = new Date(req.body.date + ' ' + req.body.time);
+                event.address = req.body.address;
+                event.settings = {
+                        needApprove : req.body.needApprove,
+                        allowGuest : req.body.allowGuest,
+                        allowSearch : req.body.allowSearch,
+                        guestsVisibility : req.body.guestsVisibility,
+                }
+                event.save().then(event => res.json({
+                    code : 0,
+                    message : 'ok'
+                }))
+            })
         }).catch(e => next(e));
     ;
 })

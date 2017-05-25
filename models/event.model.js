@@ -286,7 +286,8 @@ EventSchema.statics = {
                         format : "%Y/%m/%d %H:%M",
                         date : "$dateTime"
                     }
-                }
+                },
+                settings : 1,
             }
         }
         ]).exec();
@@ -389,6 +390,9 @@ EventSchema.statics = {
                                     , [] ]
                             }
                         }
+                    },
+                    settings : {
+                        $first : '$settings'
                     },
                     /*pendingGuests : {
                         $first : '$pendingGuests'
