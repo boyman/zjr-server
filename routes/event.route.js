@@ -120,7 +120,7 @@ router.post('/add', (req, res, next) => {
             const event = new Event(req.body);
             event.createdBy = data.userInfo.openId;
             event.settings = req.body;
-            event.dateTime = new Date(req.body.date + ' ' + req.body.time);
+            event.dateTime = req.body.utcTime;
             debug(event)
             event.save()
                 .then(savedEvent => res.json({
@@ -131,7 +131,6 @@ router.post('/add', (req, res, next) => {
                     },
                 }))
         }).catch(e => next(e));
-    ;
 })
 
 router.post('/edit', (req, res, next) => {
@@ -152,7 +151,7 @@ router.post('/edit', (req, res, next) => {
                     })
                 }
                 event.description = req.body.description;
-                event.dateTime = new Date(req.body.date + ' ' + req.body.time);
+                event.dateTime = req.body.utcTime;
                 event.address = req.body.address;
                 event.settings = {
                         needApprove : req.body.needApprove,
@@ -160,6 +159,7 @@ router.post('/edit', (req, res, next) => {
                         allowSearch : req.body.allowSearch,
                         guestsVisibility : req.body.guestsVisibility,
                 }
+                debug(event)
                 event.save().then(event => res.json({
                     code : 0,
                     message : 'ok'

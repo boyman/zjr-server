@@ -16,7 +16,7 @@ const EventSchema = new Schema({
         required : true
     },
     dateTime : {
-        type : Date,
+        type : Number,
         required : true
     },
     address : {
@@ -59,8 +59,8 @@ const EventSchema = new Schema({
         required : true
     },
     createdDateTime : {
-        type : Date,
-        default : Date.now
+        type : Number,
+        default : function(){ return new Date().getTime() }
     }
 });
 

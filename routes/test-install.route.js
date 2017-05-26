@@ -31,7 +31,7 @@ const users = [ {
 }, ];
 
 const events = [ {
-    "dateTime" : new Date("2017-06-07T12:00:00"),
+    "dateTime" : (new Date("2017-06-07 12:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : myOpenId,
     "name" : "738公社中午聚餐无验证",
     "address" : "18537 E Arrow Hwy Covina, CA 91722",
@@ -46,7 +46,7 @@ const events = [ {
         "needApprove" : false
     },
 }, {
-    "dateTime" : new Date("2017-06-09T13:00:00"),
+    "dateTime" : (new Date("2017-06-09 13:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : myOpenId,
     "name" : "738公社中午聚餐有验证",
     "address" : "18537 E Arrow Hwy Covina, CA 91722",
@@ -61,7 +61,7 @@ const events = [ {
         "needApprove" : true
     },
 }, {
-    "dateTime" : new Date("2017-07-09T18:00:00"),
+    "dateTime" : (new Date("2017-07-09 18:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : "001",
     "name" : "美国华人专家会2017年会",
     "address" : "444 Washington St San Francisco, CA 94111",
@@ -76,7 +76,7 @@ const events = [ {
         "needApprove" : true
     },
 }, {
-    "dateTime" : new Date("2017-05-18T01:00:00"),
+    "dateTime" : (new Date("2017-05-18 01:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : "002",
     "name" : "侯亮平的活动",
     "address" : "最高人民检察院反贪污贿赂总局招待所",
@@ -91,7 +91,7 @@ const events = [ {
         "needApprove" : false
     },
 }, {
-    "dateTime" : new Date("2017-10-16T08:00:00"),
+    "dateTime" : (new Date("2017-10-16 08:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : "003",
     "name" : "鸿门宴1110",
     "address" : "故秦都城咸阳郊外",
@@ -106,7 +106,7 @@ const events = [ {
         "needApprove" : false
     },
 }, {
-    "dateTime" : new Date("2017-08-09T18:00:00"),
+    "dateTime" : (new Date("2017-08-09 18:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : "004",
     "name" : "中国科技大学南加州校友会活动",
     "address" : "201 Franklin St, San Francisco, CA 94102",
@@ -121,7 +121,7 @@ const events = [ {
         "needApprove" : false
     },
 }, {
-    "dateTime" : new Date("2017-05-18T01:00:00"),
+    "dateTime" : (new Date("2017-05-18 01:00:00 GMT-0700")).getTime() / 1000,
     "createdBy" : "005",
     "name" : "新约客体验活动",
     "address" : "任何地方，只要您能使用微信",
