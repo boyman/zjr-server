@@ -237,6 +237,7 @@ EventSchema.statics = {
                 guests : {
                     $push : {
                         name : '$guestDoc.name',
+                        openId : '$guests.openId',
                         guests : '$guests.guests',
                         image : '$guestDoc.avatarUrl'
                     }
