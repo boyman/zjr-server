@@ -168,7 +168,7 @@ EventSchema.statics = {
             }
         }).exec();
     },
-    getGuests : function(id) {
+    getGuests : function(id, openId) {
         return this.aggregate([ {
             $match : {
                 _id : mongoose.Types.ObjectId(id)
@@ -197,7 +197,18 @@ EventSchema.statics = {
                     $first : '$guests'
                 },
                 pendingGuests : {
-                    $push : '$pendingDoc.name'
+                    $push : {
+                        openId : '$pendingGuests',
+                        name : '$pendingDoc.name',
+                        image : '$pendingDoc.avatarUrl'
+                    }
+                },
+                isMine : {
+                    $first : {
+                        $eq : [
+                            '$createdBy'
+                            , openId ]
+                    }
                 }
             }
         }, {
@@ -247,6 +258,9 @@ EventSchema.statics = {
                 },
                 totalGuests : {
                     $sum : '$numGuests'
+                },
+                isMine : {
+                    $first : '$isMine'
                 }
             }
         }
